@@ -1,6 +1,5 @@
 package games
 
-// AvailableGames TODO review this name
 import (
 	"encoding/json"
 	"net/http"
