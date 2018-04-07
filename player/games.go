@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
-	"strconv"
-	"time"
 )
 
 // gameLinks TODO review this name
@@ -16,14 +14,14 @@ type gameLinks struct {
 // Games TODO review name, games by month
 type Games struct {
 	Player string
-	Year   int
-	Month  time.Month
+	Year   string
+	Month  string
 }
 
 // Date date
 type Date struct {
-	Year  int
-	Month time.Month
+	Year  string
+	Month string
 }
 
 // return player name
@@ -38,42 +36,27 @@ func buildPlayer(url string) string {
 	return player
 }
 
-func buildDate(url string) (Date, error) {
+func buildDate(url string) Date {
 	yearAndMonthRegExp := regexp.MustCompile("games/[[:digit:]]{4}/[[:digit:]]{2}")
 	yearAndMonth := yearAndMonthRegExp.FindString(url)
 
 	yearRegExp := regexp.MustCompile("/[[:digit:]]{4}/")
-	yearMatch := yearRegExp.FindString(yearAndMonth)
-	year, errorMatchingYear := strconv.Atoi(yearMatch)
-
-	if errorMatchingYear != nil {
-		return Date{}, errorMatchingYear
-	}
+	year := yearRegExp.FindString(yearAndMonth)
 
 	monthRegExp := regexp.MustCompile("/[[:digit:]]{2}$")
-	monthMatch := monthRegExp.FindString(yearAndMonth)
-	monthValue, errorMatchingMonth := strconv.Atoi(monthMatch)
+	month := monthRegExp.FindString(yearAndMonth)
+	date := Date{Year: year, Month: month}
 
-	if errorMatchingMonth != nil {
-		return Date{}, errorMatchingMonth
-	}
-
-	month := time.Month(monthValue)
-
-	return Date{Year: year, Month: month}, nil
+	return date
 }
 
 // first I should get the player with something like this player/{player}/games
 // and the the year and month with something like games/{YYYY}/{MM}$
-func buildGames(url string) (Games, error) {
+func buildGames(url string) Games {
 	player := buildPlayer(url)
-	date, err := buildDate(url)
+	date := buildDate(url)
 
-	if err != nil {
-		return Games{}, err
-	}
-
-	return Games{Player: player, Year: date.Year, Month: date.Month}, nil
+	return Games{Player: player, Year: date.Year, Month: date.Month}
 }
 
 // AvailableArchives monthly archive games by player
@@ -89,15 +72,6 @@ func AvailableArchives(player string) ([]Games, error) {
 		return gamesByMonth, requestError
 	}
 
-	// TODO maybe just for fun, if it's correct also, try to follow functional programming.
-	// Basics statements:
-	//
-	// 1. No mutable data: what I'm not following here because decoding json from a `response.Body`
-	//    by providing an argument that is going to be mutated, `gameLinks`.
-	// 2. No state (no implicit, hidden state).
-	//
-	// ref: https://medium.com/@geisonfgfg/functional-go-bc116f4c96a4
-	//
 	decodingError := json.NewDecoder(response.Body).Decode(&gameLinks)
 
 	if decodingError != nil {
@@ -107,10 +81,7 @@ func AvailableArchives(player string) ([]Games, error) {
 	// here I'm converting a string with the pattern "https://api.chess.com/pub/player/{player}/games/{YYYY}/{MM}"
 	// to a `Games` struct
 	for _, link := range gameLinks.Archives {
-		games, error := buildGames(link)
-		if error != nil {
-
-		}
+		games := buildGames(link)
 		gamesByMonth = append(gamesByMonth, games)
 	}
 
