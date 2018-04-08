@@ -27,10 +27,13 @@ type Date struct {
 // return player name
 func buildPlayer(url string) string {
 	// TODO review player's pattern rules
-	playerMatchRegExp := regexp.MustCompile("player/[[:alpha:]]+/games")
-	playerMatch := playerMatchRegExp.FindString(url)
+	playerMatchServiceRegExp := regexp.MustCompile("player/[[:alpha:]]+/games")
+	playerMatchService := playerMatchServiceRegExp.FindString(url)
 
-	playerRegExp := regexp.MustCompile("/[[:alpha:]]/")
+	playerMatchRegExp := regexp.MustCompile("/[[:alpha:]]+/")
+	playerMatch := playerMatchRegExp.FindString(playerMatchService)
+
+	playerRegExp := regexp.MustCompile("[[:alpha:]]+")
 	player := playerRegExp.FindString(playerMatch)
 
 	return player
@@ -41,10 +44,11 @@ func buildDate(url string) Date {
 	yearAndMonth := yearAndMonthRegExp.FindString(url)
 
 	yearRegExp := regexp.MustCompile("/[[:digit:]]{4}/")
-	year := yearRegExp.FindString(yearAndMonth)
+	yearMatch := yearRegExp.FindString(yearAndMonth)
+	year := yearMatch[1 : len(yearMatch)-1]
 
 	monthRegExp := regexp.MustCompile("/[[:digit:]]{2}$")
-	month := monthRegExp.FindString(yearAndMonth)
+	month := monthRegExp.FindString(yearAndMonth)[1:]
 	date := Date{Year: year, Month: month}
 
 	return date
