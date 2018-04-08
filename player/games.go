@@ -6,8 +6,8 @@ import (
 	"regexp"
 )
 
-// gameLinks TODO review this name
-type gameLinks struct {
+// gameUrls all archived urls
+type gameUrls struct {
 	Archives []string `json:"archives"`
 }
 
@@ -64,7 +64,7 @@ func AvailableArchives(player string) ([]Games, error) {
 	var url = "https://api.chess.com/pub/player/" + player + "/games/archives"
 	var gamesByMonth []Games
 
-	gameLinks := gameLinks{}
+	urls := gameUrls{}
 
 	response, requestError := http.Get(url)
 
@@ -72,7 +72,7 @@ func AvailableArchives(player string) ([]Games, error) {
 		return gamesByMonth, requestError
 	}
 
-	decodingError := json.NewDecoder(response.Body).Decode(&gameLinks)
+	decodingError := json.NewDecoder(response.Body).Decode(&urls)
 
 	if decodingError != nil {
 		return gamesByMonth, decodingError
@@ -80,8 +80,8 @@ func AvailableArchives(player string) ([]Games, error) {
 
 	// here I'm converting a string with the pattern "https://api.chess.com/pub/player/{player}/games/{YYYY}/{MM}"
 	// to a `Games` struct
-	for _, link := range gameLinks.Archives {
-		games := buildGames(link)
+	for _, url := range urls.Archives {
+		games := buildGames(url)
 		gamesByMonth = append(gamesByMonth, games)
 	}
 
