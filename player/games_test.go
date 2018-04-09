@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	httpmock "gopkg.in/jarcoal/httpmock.v1"
 )
 
 var tests = []struct {
@@ -44,6 +45,20 @@ var tests = []struct {
 }
 
 func TestAvailableArchivesOK(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", "https://api.chess.com/pub/player/learnercys/games/archives",
+		httpmock.NewStringResponder(200, `{
+			"archives": [
+				"https://api.chess.com/pub/player/learnercys/games/2015/12",
+				"https://api.chess.com/pub/player/learnercys/games/2018/01",
+				"https://api.chess.com/pub/player/learnercys/games/2018/02",
+				"https://api.chess.com/pub/player/learnercys/games/2018/03",
+				"https://api.chess.com/pub/player/learnercys/games/2018/04"
+			]
+		}`))
+
 	for _, test := range tests {
 		games, err := AvailableArchives(test.input)
 

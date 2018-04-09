@@ -32,3 +32,7 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  branch = "v1"
+  name = "gopkg.in/jarcoal/httpmock.v1"

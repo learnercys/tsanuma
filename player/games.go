@@ -11,7 +11,7 @@ type gameUrls struct {
 	Archives []string `json:"archives"`
 }
 
-// Games TODO review name, games by month
+// Games games by month
 type Games struct {
 	Player string
 	Year   string
@@ -26,7 +26,6 @@ type Date struct {
 
 // return player name
 func buildPlayer(url string) string {
-	// TODO review player's pattern rules
 	playerMatchServiceRegExp := regexp.MustCompile("player/[[:alpha:]]+/games")
 	playerMatchService := playerMatchServiceRegExp.FindString(url)
 
